@@ -26,14 +26,18 @@ module.exports = {
         test: /\.css$/,
         use: ['style-loader', 'css-loader'],
       },
+      {
+        test: /\.html$/i,
+        loader: 'html-loader',
+      },
     ],
   },
   plugins: [
-    new HtmlWebpackPlugin(),
+    new HtmlWebpackPlugin({
+      template: 'template.html',
+    }),
   ],
   devServer: {
-    contentBase: path.join(__dirname, 'dist'),
-    compress: true,
     port: 9000,
   },
 };
