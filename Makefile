@@ -11,4 +11,4 @@ test-coverage:
 	npm run test -- --coverage
 
 build:
-	npm rub build
+	npm run build
