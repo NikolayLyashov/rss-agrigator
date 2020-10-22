@@ -6,7 +6,7 @@ on:
       - main
 
 jobs:
-  
+
   build:
 
     # The type of machine to run the job on
@@ -18,10 +18,6 @@ jobs:
         node-version: [14.x]
 
     steps:
-        # Check-out repository under GitHub workspace
-        # https://github.com/actions/checkout
-      - name: Hexlet project check
-        uses: hexlet/project-action@release
         
       - uses: actions/checkout@v2
         # Step's name
@@ -53,5 +49,9 @@ jobs:
         with:
           coverageCommand: make test-coverage
           debug: true
+        # Check-out repository under GitHub workspace
+        # https://github.com/actions/checkout
+      - name: Hexlet project check
+        uses: hexlet/project-action@release
 
   
