@@ -9,3 +9,6 @@ test:
 
 test-coverage:
 	npm run test -- --coverage
+
+build:
+	npm rub build
