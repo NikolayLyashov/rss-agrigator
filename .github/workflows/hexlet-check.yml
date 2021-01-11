@@ -46,7 +46,7 @@ jobs:
         uses: paambaati/codeclimate-action@v2.6.0
         # Add Code Climate secret key
         env:
-          СС_HEXLET_ID: ${{ secrets.HEXLET_ID}}
+          hexlet-id: ${{ secrets.HEXLET_ID}}
           CC_TEST_REPORTER_ID: ${{ secrets.TESTCOVERAGE }}
         with:
           coverageCommand: make test-coverage
