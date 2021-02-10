@@ -1,85 +1,102 @@
+/* eslint-disable no-shadow */
+/* eslint-disable consistent-return */
 /* eslint-disable no-undef */
 import axios from 'axios';
 import * as yup from 'yup';
 import watchedState from './watchers.js';
 import parser from './parser.js';
 
-const form = document.querySelector('form');
+const button = document.querySelector('.btn');
+const feedback = document.querySelector('.feedback');
+const input = document.querySelector('input');
+const feeds = document.querySelector('.feeds');
+const posts = document.querySelector('.posts');
 
-const state = {
-  form: {
-    processState: 'filling',
-    valid: false,
-    error: null,
-  },
-  // processState: 'filling',
-  posts: [],
-  feeds: [],
-  downloadProcess: { status: 'filling', error: null },
+const domElements = {
+  button,
+  input,
+  feeds,
+  feedback,
+  posts,
 };
 
-const watcher = watchedState(state);
+const app = () => {
+  const form = document.querySelector('form');
 
-const schema = yup.string().url();
+  const state = {
+    form: {
+      processState: 'filling',
+      valid: false,
+      error: null,
+    },
+    // processState: 'filling',
+    posts: [],
+    feeds: [],
+    downloadProcess: { status: 'filling', error: null },
+  };
 
-const validate = (url) => {
-  schema.validateSync(url);
-};
+  const watcher = watchedState(state, domElements);
 
-const addPosts = (doc) => {
-  const items = doc.querySelectorAll('item');
-  let posts = [];
+  const schema = yup.string().url();
 
-  items.forEach((item) => {
-    const title = item.querySelector('title').textContent;
-    const description = item.querySelector('description').textContent;
-    const link = item.querySelector('link').textContent;
+  const validate = (url) => {
+    try {
+      schema.validateSync(url);
+      return null;
+    } catch (err) {
+      return err;
+    }
+  };
 
-    // const { posts } = state;
-    const post = { title, description, link };
+  const addPosts = ({ items }) => {
+    let posts = [];
 
-    posts = [...posts, post];
+    items.forEach(({ title, description, link }) => {
+      const post = { title, description, link };
+
+      posts = [...posts, post];
+    });
+    watcher.posts = [...posts];
+  };
+
+  const addFeeds = ({ title, description }) => {
+    let feeds = [];
+    const feed = { title, description };
+
+    feeds = [...feeds, feed];
+    watcher.feeds = [...feeds];
+  };
+
+  const getStream = (url) => axios(`https://api.allorigins.win/get?url=${encodeURIComponent(url)}`);
+
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+
+    const formData = new FormData(e.target);
+    const url = formData.get('url');
+
+    try {
+      const getValidError = validate(url);
+
+      if (getValidError) {
+        watcher.form = { ...watcher.form, processState: 'error', error: getValidError.message };
+      } else {
+        watcher.form = { ...watcher.form, valid: true };
+      }
+
+      watcher.downloadProcess = { ...watcher.downloadProcess, status: 'processing' };
+
+      getStream(url)
+        .then((res) => {
+          const parserData = parser(res.data.contents);
+          addFeeds(parserData);
+          addPosts(parserData);
+          watcher.downloadProcess = { ...watcher.downloadProcess, status: 'success' };
+        });
+    } catch (err) {
+      watcher.downloadProcess = { ...watcher.downloadProcess, status: 'error', error: err };
+    }
   });
-  watcher.posts = [...posts];
 };
 
-const addFeeds = (doc) => {
-  let feeds = [];
-
-  const title = doc.querySelector('title').textContent;
-  const description = doc.querySelector('description').textContent;
-
-  const feed = { title, description };
-
-  feeds = [...feeds, feed];
-  watcher.feeds = [...feeds];
-};
-
-const getStream = (url) => axios(`https://api.allorigins.win/get?url=${encodeURIComponent(url)}`);
-
-form.addEventListener('submit', (e) => {
-  e.preventDefault();
-
-  const formData = new FormData(e.target);
-  const url = formData.get('url');
-
-  try {
-    validate(url);
-
-    watcher.form = { ...watcher.form, valid: true };
-    watcher.downloadProcess = { ...watcher.downloadProcess, status: 'processing' };
-
-    getStream(url)
-      .then((res) => parser(res.data.contents))
-      .then((doc) => {
-        addFeeds(doc);
-        addPosts(doc);
-        watcher.downloadProcess = { ...watcher.downloadProcess, status: 'success' };
-      })
-      .catch((err) => {
-        watcher.downloadProcess = { ...watcher.downloadProcess, status: 'error', error: err };
-      });
-  } catch (err) {
-    watcher.form = { ...watcher.form, processState: 'error', error: err.message };
-  }
-});
+export default app;
