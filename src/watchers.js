@@ -1,25 +1,19 @@
-/* eslint-disable array-callback-return */
-/* eslint-disable no-undef */
-
 import onChange from 'on-change';
 
-const renderErrorForm = (error, elements) => {
-  const { input, feedback } = elements;
-  const textError = `${error[0].toUpperCase()}${error.slice(1)}`;
+const renderErrorForm = (error, { input, feedback }) => {
+  // const textError = `${error[0].toUpperCase()}${error.slice(1)}`;
   input.classList.add('is-invalid');
   feedback.classList.add('text-danger');
-  feedback.textContent = textError;
+  feedback.textContent = 'err';
 };
 
-const deletedError = (elements) => {
-  const { input, feedback } = elements;
+const deletedError = ({ input, feedback }) => {
   input.classList.remove('is-invalid');
   feedback.classList.remove('text-danger');
   feedback.textContent = '';
 };
 
-const renderFinishedForm = (elements) => {
-  const { feedback, input } = elements;
+const renderFinishedForm = ({ feedback, input }) => {
   input.classList.remove('is-invalid');
   feedback.classList.remove('text-danger');
   feedback.style.color = 'green';
@@ -28,8 +22,7 @@ const renderFinishedForm = (elements) => {
   input.focus();
 };
 
-const renderFeeds = (data, elements) => {
-  const { feeds } = elements;
+const renderFeeds = (data, { feeds }) => {
   const titleFeeds = document.createElement('h2');
   const ul = document.createElement('ul');
 
@@ -52,13 +45,13 @@ const renderFeeds = (data, elements) => {
     li.appendChild(p);
 
     ul.appendChild(li);
+    return null;
   });
 
   feeds.appendChild(ul);
 };
 
-const renderPosts = (data, elements) => {
-  const { posts } = elements;
+const renderPosts = (data, { posts }) => {
   const titlePosts = document.createElement('h2');
   const ul = document.createElement('ul');
 
@@ -80,6 +73,7 @@ const renderPosts = (data, elements) => {
     li.innerHTML = a;
     li.appendChild(buttonPreview);
     ul.appendChild(li);
+    return null;
   });
   posts.appendChild(ul);
 };
@@ -87,8 +81,9 @@ const renderPosts = (data, elements) => {
 const renderForm = ({ valid, error }, elements) => {
   if (valid) {
     deletedError(elements);
+  } else {
+    renderErrorForm(error, elements);
   }
-  renderErrorForm(error, elements);
 };
 
 const renderDownloadProcess = ({ status, error }, elements) => {

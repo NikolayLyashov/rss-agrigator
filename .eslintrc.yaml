@@ -5,6 +5,7 @@ plugins:
 
 
 env:
+  browser: true
   node: true
   es6: true
   jest/globals: true
@@ -23,6 +24,7 @@ parserOptions:
 rules:
   no-console: 0
   import/extensions: 0
+  no-param-reassign: 0
   
   
 

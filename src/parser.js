@@ -1,6 +1,3 @@
-/* eslint-disable no-shadow */
-/* eslint-disable no-undef */
-
 const parser = (data) => {
   const domParser = new DOMParser();
   const document = domParser.parseFromString(data, 'text/xml');
@@ -10,10 +7,10 @@ const parser = (data) => {
   const items = [...document.querySelectorAll('item')];
 
   const newItems = items.map((item) => {
-    const title = item.querySelector('title').textContent;
-    const description = item.querySelector('description').textContent;
+    const itemTitle = item.querySelector('title').textContent;
+    const itemDescription = item.querySelector('description').textContent;
     const link = item.querySelector('link').textContent;
-    return { title, description, link };
+    return { title: itemTitle, description: itemDescription, link };
   });
 
   console.log(newItems);
