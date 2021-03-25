@@ -1,10 +1,13 @@
 import onChange from 'on-change';
+import i18next from 'i18next';
 
-const renderErrorForm = (error, { input, feedback }) => {
+const renderError = ({ name }, { input, feedback }) => {
+  // const errorName = err.name;
+  // console.log(errorName);
   // const textError = `${error[0].toUpperCase()}${error.slice(1)}`;
   input.classList.add('is-invalid');
   feedback.classList.add('text-danger');
-  feedback.textContent = 'err';
+  feedback.textContent = i18next.t(`errors.${name}`);
 };
 
 const deletedError = ({ input, feedback }) => {
@@ -17,12 +20,12 @@ const renderFinishedForm = ({ feedback, input }) => {
   input.classList.remove('is-invalid');
   feedback.classList.remove('text-danger');
   feedback.style.color = 'green';
-  feedback.textContent = 'Rss has been loaded';
+  feedback.textContent = i18next.t('validMessage');
   input.value = '';
   input.focus();
 };
 
-const renderFeeds = (data, { feeds }) => {
+const renderFeeds = (stateFeeds, { feeds }) => {
   const titleFeeds = document.createElement('h2');
   const ul = document.createElement('ul');
 
@@ -31,7 +34,7 @@ const renderFeeds = (data, { feeds }) => {
 
   ul.classList.add('list-group', 'mb-5');
 
-  data.map((feed) => {
+  stateFeeds.map((feed) => {
     const { title, description } = feed;
     const li = document.createElement('li');
     const h3 = document.createElement('h3');
@@ -82,7 +85,7 @@ const renderForm = ({ valid, error }, elements) => {
   if (valid) {
     deletedError(elements);
   } else {
-    renderErrorForm(error, elements);
+    renderError(error, elements);
   }
 };
 
@@ -100,7 +103,7 @@ const renderDownloadProcess = ({ status, error }, elements) => {
       break;
     case 'error':
       button.disabled = false;
-      renderErrorForm(error, elements);
+      renderError(error, elements);
       break;
     default:
       break;

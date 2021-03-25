@@ -1,7 +1,9 @@
 import axios from 'axios';
 import * as yup from 'yup';
+import i18next from 'i18next';
 import watchedState from './watchers.js';
 import parser from './parser.js';
+import en from './locales/en.js';
 
 const validate = (url) => {
   try {
@@ -32,7 +34,17 @@ const addPosts = ({ items }, watch) => {
   watch.posts = [...posts];
 };
 
+const getStream = (url) => axios(`https://api.allorigins.win/get?url=${encodeURIComponent(url)}`);
+
 const app = () => {
+  i18next.init({
+    lng: 'en',
+    debug: true,
+    resources: {
+      en,
+    },
+  });
+
   const state = {
     form: {
       processState: 'filling',
@@ -56,8 +68,6 @@ const app = () => {
 
   const watcher = watchedState(state, domElements);
 
-  const getStream = (url) => axios(`https://api.allorigins.win/get?url=${encodeURIComponent(url)}`);
-
   domElements.form.addEventListener('submit', (e) => {
     e.preventDefault();
 
@@ -67,7 +77,7 @@ const app = () => {
     const getValidError = validate(url);
 
     if (getValidError) {
-      watcher.form = { ...watcher.form, processState: 'error', error: getValidError.message };
+      watcher.form = { ...watcher.form, processState: 'error', error: getValidError };
       return;
     }
     watcher.form = { ...watcher.form, valid: true };
@@ -76,6 +86,7 @@ const app = () => {
     getStream(url)
       .then((res) => {
         const parserData = parser(res.data.contents);
+        console.log(parserData);
         addFeeds(parserData, watcher);
         addPosts(parserData, watcher);
         watcher.downloadProcess = { ...watcher.downloadProcess, status: 'success' };

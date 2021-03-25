@@ -13,7 +13,6 @@ const parser = (data) => {
     return { title: itemTitle, description: itemDescription, link };
   });
 
-  console.log(newItems);
   return {
     title,
     description,
