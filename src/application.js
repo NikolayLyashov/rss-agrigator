@@ -37,63 +37,73 @@ const addPosts = ({ items }, watch) => {
 const getStream = (url) => axios(`https://api.allorigins.win/get?url=${encodeURIComponent(url)}`);
 
 const app = () => {
-  i18next.init({
-    lng: 'en',
-    debug: true,
-    resources: {
-      en,
-    },
-  });
+  const fn = () => {
+    console.log('fn');
+    const newInstance = i18next.createInstance({
+      fallbackLng: 'en',
+      // debug: true,
+      returnObjects: true,
+      resources: {
+        en,
+      },
+    }, (_, t) => t('key'));
 
-  const state = {
-    form: {
-      processState: 'filling',
-      valid: false,
-      error: null,
-    },
-    // processState: 'filling',
-    posts: [],
-    feeds: [],
-    downloadProcess: { status: 'filling', error: null },
+    const state = {
+      form: {
+        processState: 'filling',
+        valid: false,
+        error: null,
+      },
+      links: [],
+      // processState: 'filling',
+      posts: [],
+      feeds: [],
+      downloadProcess: { status: 'filling', error: null },
+    };
+
+    const domElements = {
+      button: document.querySelector('.btn'),
+      feedback: document.querySelector('.feedback'),
+      input: document.querySelector('input'),
+      feeds: document.querySelector('.feeds'),
+      posts: document.querySelector('.posts'),
+      form: document.querySelector('form'),
+    };
+
+    const watcher = watchedState(state, domElements, newInstance);
+
+    domElements.form.addEventListener('submit', (e) => {
+      e.preventDefault();
+
+      const formData = new FormData(e.target);
+      const url = formData.get('url');
+      const getValidError = validate(url);
+
+      if (getValidError) {
+        watcher.form = { ...watcher.form, processState: 'error', error: getValidError };
+        return;
+      }
+      watcher.form = { ...watcher.form, valid: true };
+      watcher.downloadProcess = { ...watcher.downloadProcess, status: 'processing' };
+
+      getStream(url)
+        .then((res) => {
+          const parserData = parser(res.data.contents);
+          console.log(parserData, state);
+          addFeeds(parserData, watcher);
+          addPosts(parserData, watcher);
+          watcher.downloadProcess = { ...watcher.downloadProcess, status: 'success' };
+          state.links.push(url);
+        }).catch((err) => {
+          watcher.downloadProcess = { ...watcher.downloadProcess, status: 'error', error: err };
+        });
+    });
   };
-
-  const domElements = {
-    button: document.querySelector('.btn'),
-    feedback: document.querySelector('.feedback'),
-    input: document.querySelector('input'),
-    feeds: document.querySelector('.feeds'),
-    posts: document.querySelector('.posts'),
-    form: document.querySelector('form'),
-  };
-
-  const watcher = watchedState(state, domElements);
-
-  domElements.form.addEventListener('submit', (e) => {
-    e.preventDefault();
-
-    const formData = new FormData(e.target);
-    const url = formData.get('url');
-
-    const getValidError = validate(url);
-
-    if (getValidError) {
-      watcher.form = { ...watcher.form, processState: 'error', error: getValidError };
-      return;
-    }
-    watcher.form = { ...watcher.form, valid: true };
-    watcher.downloadProcess = { ...watcher.downloadProcess, status: 'processing' };
-
-    getStream(url)
-      .then((res) => {
-        const parserData = parser(res.data.contents);
-        console.log(parserData);
-        addFeeds(parserData, watcher);
-        addPosts(parserData, watcher);
-        watcher.downloadProcess = { ...watcher.downloadProcess, status: 'success' };
-      }).catch((err) => {
-        watcher.downloadProcess = { ...watcher.downloadProcess, status: 'error', error: err };
-      });
-  });
+  setTimeout(function tick() {
+    console.log('tick');
+    fn();
+    setTimeout(tick, 5000);
+  }, 0);
 };
 
 export default app;

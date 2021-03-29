@@ -1,10 +1,6 @@
 import onChange from 'on-change';
-import i18next from 'i18next';
 
-const renderError = ({ name }, { input, feedback }) => {
-  // const errorName = err.name;
-  // console.log(errorName);
-  // const textError = `${error[0].toUpperCase()}${error.slice(1)}`;
+const renderError = ({ name }, { input, feedback }, i18next) => {
   input.classList.add('is-invalid');
   feedback.classList.add('text-danger');
   feedback.textContent = i18next.t(`errors.${name}`);
@@ -16,7 +12,7 @@ const deletedError = ({ input, feedback }) => {
   feedback.textContent = '';
 };
 
-const renderFinishedForm = ({ feedback, input }) => {
+const renderFinishedForm = ({ feedback, input }, i18next) => {
   input.classList.remove('is-invalid');
   feedback.classList.remove('text-danger');
   feedback.style.color = 'green';
@@ -26,8 +22,16 @@ const renderFinishedForm = ({ feedback, input }) => {
 };
 
 const renderFeeds = (stateFeeds, { feeds }) => {
-  const titleFeeds = document.createElement('h2');
-  const ul = document.createElement('ul');
+  let titleFeeds;
+  let ul;
+
+  if (!feeds.querySelector('h2')) {
+    titleFeeds = document.createElement('h2');
+    ul = document.createElement('ul');
+  } else {
+    titleFeeds = feeds.querySelector('h2');
+    ul = feeds.querySelector('ul');
+  }
 
   titleFeeds.textContent = 'Feeds';
   feeds.appendChild(titleFeeds);
@@ -55,8 +59,16 @@ const renderFeeds = (stateFeeds, { feeds }) => {
 };
 
 const renderPosts = (data, { posts }) => {
-  const titlePosts = document.createElement('h2');
-  const ul = document.createElement('ul');
+  let titlePosts;
+  let ul;
+
+  if (!posts.querySelector('h2')) {
+    titlePosts = document.createElement('h2');
+    ul = document.createElement('ul');
+  } else {
+    titlePosts = posts.querySelector('h2');
+    ul = posts.querySelector('ul');
+  }
 
   titlePosts.textContent = 'Posts';
   posts.appendChild(titlePosts);
@@ -81,15 +93,15 @@ const renderPosts = (data, { posts }) => {
   posts.appendChild(ul);
 };
 
-const renderForm = ({ valid, error }, elements) => {
+const renderForm = ({ valid, error }, elements, i18next) => {
   if (valid) {
     deletedError(elements);
   } else {
-    renderError(error, elements);
+    renderError(error, elements, i18next);
   }
 };
 
-const renderDownloadProcess = ({ status, error }, elements) => {
+const renderDownloadProcess = ({ status, error }, elements, i18next) => {
   const { button, input } = elements;
   switch (status) {
     case 'processing':
@@ -99,7 +111,7 @@ const renderDownloadProcess = ({ status, error }, elements) => {
     case 'success':
       button.disabled = false;
       input.readOnly = false;
-      renderFinishedForm(elements);
+      renderFinishedForm(elements, i18next);
       break;
     case 'error':
       button.disabled = false;
@@ -110,10 +122,10 @@ const renderDownloadProcess = ({ status, error }, elements) => {
   }
 };
 
-const watchedState = (state, elements) => onChange(state, (path, value) => {
+const watchedState = (state, elements, i18next) => onChange(state, (path, value) => {
   switch (path) {
     case 'form':
-      renderForm(value, elements);
+      renderForm(value, elements, i18next);
       break;
     case 'posts':
       renderPosts(state.posts, elements);
@@ -122,7 +134,7 @@ const watchedState = (state, elements) => onChange(state, (path, value) => {
       renderFeeds(state.feeds, elements);
       break;
     case 'downloadProcess':
-      renderDownloadProcess(value, elements);
+      renderDownloadProcess(value, elements, i18next);
       break;
     default:
       break;
