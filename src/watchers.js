@@ -97,6 +97,7 @@ const renderForm = ({ valid, error }, elements, i18next) => {
   if (valid) {
     deletedError(elements);
   } else {
+    console.log(error);
     renderError(error, elements, i18next);
   }
 };
@@ -123,6 +124,7 @@ const renderDownloadProcess = ({ status, error }, elements, i18next) => {
 };
 
 const watchedState = (state, elements, i18next) => onChange(state, (path, value) => {
+  console.log(state);
   switch (path) {
     case 'form':
       renderForm(value, elements, i18next);
