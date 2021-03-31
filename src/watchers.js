@@ -33,6 +33,8 @@ const renderFeeds = (stateFeeds, { feeds }) => {
     ul = feeds.querySelector('ul');
   }
 
+  ul.innerHTML = '';
+
   titleFeeds.textContent = 'Feeds';
   feeds.appendChild(titleFeeds);
 
@@ -69,6 +71,8 @@ const renderPosts = (data, { posts }) => {
     titlePosts = posts.querySelector('h2');
     ul = posts.querySelector('ul');
   }
+
+  ul.innerHTML = '';
 
   titlePosts.textContent = 'Posts';
   posts.appendChild(titlePosts);

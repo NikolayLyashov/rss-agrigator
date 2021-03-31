@@ -16,26 +16,13 @@ const validate = (url) => {
   }
 };
 
-// const addFeeds = ({ title, description }, watch) => {
-//   // let feeds = [];
-//   const feed = { title, description };
-//   console.log(feed);
-//   // feeds = [...feeds, feed];
-//   watch.feeds = [...feed];
-// };
-
 const addFeeds = ({ title, description }, watch) => {
-  // let feeds = [];
   const feed = { title, description };
 
-  // feeds = [feed];
-  watch.feeds = [feed, watch.feeds];
-  console.log(watch.feeds);
+  watch.feeds = [...watch.feeds, feed];
 };
 
 const addPosts = ({ items }, watch) => {
-  // let posts = [];
-
   const posts = items.map(({ title, description, link }) => ({ title, description, link }));
   watch.posts = [...watch.posts, ...posts];
 };
@@ -45,7 +32,6 @@ const getStream = (url) => axios(`https://api.allorigins.win/get?url=${encodeURI
 const app = () => {
   const newInstance = i18next.createInstance({
     fallbackLng: 'en',
-    // debug: true,
     returnObjects: true,
     resources: {
       en,
@@ -59,7 +45,6 @@ const app = () => {
       error: null,
     },
     links: [],
-    // processState: 'filling',
     posts: [],
     feeds: [],
     downloadProcess: { status: 'filling', error: null },
@@ -82,7 +67,7 @@ const app = () => {
     const formData = new FormData(e.target);
     const url = formData.get('url');
     const getValidError = validate(url);
-    // console.log(url);
+
     if (state.links.indexOf(url) >= 0) {
       watcher.form = {
         ...watcher.form,
@@ -109,9 +94,10 @@ const app = () => {
     getStream(url)
       .then((res) => {
         const parserData = parser(res.data.contents);
-        // console.log(parserData, state);
+
         addFeeds(parserData, watcher);
         addPosts(parserData, watcher);
+
         watcher.downloadProcess = { ...watcher.downloadProcess, status: 'success' };
         state.links.push(url);
       }).catch((err) => {
@@ -120,29 +106,29 @@ const app = () => {
   });
 
   const compareStream = () => {
-    const streams = state.links.map((link) => getStream(link)
-      .then((res) => parser(res.data.contents))//
-      .catch((e) => console.log(e)));
+    const fn = () => {
+      const streams = state.links.map((link) => getStream(link)
+        .then((res) => {
+          const steamData = parser(res.data.contents);
+          const newItems = _.differenceWith(steamData, state.posts, _.isEqual);
 
-    const promisesStreams = Promise.all(streams);
+          if (newItems.length) {
+            addPosts(newItems);
+          }
+        })
+        .catch((e) => console.log(e)));
 
-    promisesStreams.then((contents) => contents.map(({ items }) => {
-      const newItems = _.differenceWith(items, state.posts, _.isEqual);
-
-      console.log(newItems);
-      if (newItems.length) {
-        addPosts(newItems);
-      }
-      // console.log(items, state.posts);
-      return null;
-    }));
+      return Promise.all(streams);
+    };
+    fn().then(() => {
+      setTimeout(function tick() {
+        console.log('tick');
+        fn();
+        setTimeout(tick, 5000);
+      }, 0);
+    });
   };
-  setTimeout(function tick() {
-    // console.log('tick');
-    compareStream();
-    // fn();
-    setTimeout(tick, 5000);
-  }, 0);
+  compareStream();
 };
 
 export default app;
