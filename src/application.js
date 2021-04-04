@@ -1,3 +1,4 @@
+/* eslint-disable object-curly-newline */
 import axios from 'axios';
 import * as yup from 'yup';
 import _ from 'lodash';
@@ -16,18 +17,25 @@ const validate = (url) => {
   }
 };
 
-const addFeeds = ({ title, description }, watch) => {
-  const feed = { title, description };
+const addFeeds = (title, description, watch, feedId, url) => {
+  const feed = { title, description, url, feedId };
 
   watch.feeds = [...watch.feeds, feed];
 };
 
-const addPosts = ({ items }, watch) => {
+const addPosts = (items, watch, feedId) => {
+  console.log(items);
+  if (!items.length) {
+    console.log('hi');
+    return null;
+  }
+
   const posts = items.map(({ title, description, link }) => ({ title, description, link }));
-  watch.posts = [...watch.posts, ...posts];
+
+  watch.posts = [...watch.posts, { items: [...watch.posts, ...posts], id: feedId }];
 };
 
-const getStream = (url) => axios(`https://api.allorigins.win/get?url=${encodeURIComponent(url)}`);
+const addProxyTo = (url) => `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
 
 const app = () => {
   const newInstance = i18next.createInstance({
@@ -37,6 +45,7 @@ const app = () => {
       en,
     },
   }, (__, t) => t('key'));
+  // Без колбека не работает
 
   const state = {
     form: {
@@ -44,7 +53,6 @@ const app = () => {
       valid: false,
       error: null,
     },
-    links: [],
     posts: [],
     feeds: [],
     downloadProcess: { status: 'filling', error: null },
@@ -63,12 +71,13 @@ const app = () => {
 
   domElements.form.addEventListener('submit', (e) => {
     e.preventDefault();
+    const urls = state.feeds.map(({ url }) => url);
 
     const formData = new FormData(e.target);
     const url = formData.get('url');
     const getValidError = validate(url);
 
-    if (state.links.indexOf(url) >= 0) {
+    if (urls.includes(url)) {
       watcher.form = {
         ...watcher.form,
         processState: 'error',
@@ -91,43 +100,40 @@ const app = () => {
     watcher.form = { ...watcher.form, valid: true };
     watcher.downloadProcess = { ...watcher.downloadProcess, status: 'processing' };
 
-    getStream(url)
+    axios(addProxyTo(url))
       .then((res) => {
-        const parserData = parser(res.data.contents);
+        const { items, title, description } = parser(res.data.contents);
+        const feedId = _.uniqueId();
 
-        addFeeds(parserData, watcher);
-        addPosts(parserData, watcher);
+        addFeeds(title, description, watcher, feedId, url);
+        addPosts(items, watcher, feedId);
 
         watcher.downloadProcess = { ...watcher.downloadProcess, status: 'success' };
-        state.links.push(url);
       }).catch((err) => {
         watcher.downloadProcess = { ...watcher.downloadProcess, status: 'error', error: err };
       });
   });
 
   const compareStream = () => {
-    const fn = () => {
-      const streams = state.links.map((link) => getStream(link)
-        .then((res) => {
-          const steamData = parser(res.data.contents);
-          const newItems = _.differenceWith(steamData, state.posts, _.isEqual);
+    const streams = state.feeds.map(({ url }) => axios(addProxyTo(url))
+      .then((res) => {
+        const { items, description } = parser(res.data.contents);
+        const { feedId } = state.feeds.find((f) => f.description === description);
 
-          if (newItems.length) {
-            addPosts(newItems);
-          }
-        })
-        .catch((e) => console.log(e)));
+        const posts = state.posts.filter(({ id }) => id === feedId);
+        console.log(posts);
+        const newItems = _.differenceWith(posts.items, items, _.isEqual);
+        console.log(newItems, state.posts);
+        // add id feed
+        addPosts(newItems, watcher, feedId);
+      })
+      .catch((e) => console.log(e)));
 
-      return Promise.all(streams);
-    };
-    fn().then(() => {
-      setTimeout(function tick() {
-        console.log('tick');
-        fn();
-        setTimeout(tick, 5000);
-      }, 0);
+    Promise.all(streams).then(() => {
+      setTimeout(compareStream, 5000);
     });
   };
+
   compareStream();
 };
 

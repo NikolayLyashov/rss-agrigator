@@ -1,4 +1,5 @@
 import onChange from 'on-change';
+import _ from 'lodash';
 
 const renderError = ({ name }, { input, feedback }, i18next) => {
   input.classList.add('is-invalid');
@@ -79,7 +80,9 @@ const renderPosts = (data, { posts }) => {
 
   ul.classList.add('list-group');
 
-  data.map((post) => {
+  const postsData = _.flattenDeep(data.map((post) => post.items), 3);
+
+  postsData.map((post) => {
     const { link, title } = post;
     const li = document.createElement('li');
     const a = `<a href=${link} class="font-weight-bold" data-id="2" target="_blank" rel="noopener noreferrer">${title}</a>`;
@@ -128,7 +131,6 @@ const renderDownloadProcess = ({ status, error }, elements, i18next) => {
 };
 
 const watchedState = (state, elements, i18next) => onChange(state, (path, value) => {
-  console.log(state);
   switch (path) {
     case 'form':
       renderForm(value, elements, i18next);
