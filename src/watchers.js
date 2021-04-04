@@ -80,9 +80,7 @@ const renderPosts = (data, { posts }) => {
 
   ul.classList.add('list-group');
 
-  const postsData = _.flattenDeep(data.map((post) => post.items), 3);
-
-  postsData.map((post) => {
+  data.map((post) => {
     const { link, title } = post;
     const li = document.createElement('li');
     const a = `<a href=${link} class="font-weight-bold" data-id="2" target="_blank" rel="noopener noreferrer">${title}</a>`;

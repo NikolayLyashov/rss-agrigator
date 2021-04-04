@@ -24,18 +24,34 @@ const addFeeds = (title, description, watch, feedId, url) => {
 };
 
 const addPosts = (items, watch, feedId) => {
-  console.log(items);
-  if (!items.length) {
-    console.log('hi');
-    return null;
-  }
+  const posts = items.map(({ title, description, link }) => ({ title, description, link, feedId }));
 
-  const posts = items.map(({ title, description, link }) => ({ title, description, link }));
-
-  watch.posts = [...watch.posts, { items: [...watch.posts, ...posts], id: feedId }];
+  watch.posts = [...watch.posts, ...posts];
 };
 
 const addProxyTo = (url) => `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
+
+const compareStream = (watcher) => {
+  if (!watcher.feeds.length) {
+    return;
+  }
+
+  const streams = watcher.feeds.map(({ url }) => axios(addProxyTo(url))
+    .then((res) => {
+      const { items, description } = parser(res.data.contents);
+      const { feedId } = watcher.feeds.find((f) => f.description === description);
+
+      const posts = watcher.posts.filter((post) => post.feedId === feedId);
+      const newItems = _.differenceWith(posts.items, items, _.isEqual);
+
+      addPosts(newItems, watcher, feedId);
+    })
+    .catch((e) => console.log(e)));
+
+  Promise.all(streams).then(() => {
+    setTimeout(compareStream, 5000);
+  });
+};
 
 const app = () => {
   const newInstance = i18next.createInstance({
@@ -114,27 +130,7 @@ const app = () => {
       });
   });
 
-  const compareStream = () => {
-    const streams = state.feeds.map(({ url }) => axios(addProxyTo(url))
-      .then((res) => {
-        const { items, description } = parser(res.data.contents);
-        const { feedId } = state.feeds.find((f) => f.description === description);
-
-        const posts = state.posts.filter(({ id }) => id === feedId);
-        console.log(posts);
-        const newItems = _.differenceWith(posts.items, items, _.isEqual);
-        console.log(newItems, state.posts);
-        // add id feed
-        addPosts(newItems, watcher, feedId);
-      })
-      .catch((e) => console.log(e)));
-
-    Promise.all(streams).then(() => {
-      setTimeout(compareStream, 5000);
-    });
-  };
-
-  compareStream();
+  compareStream(watcher, state);
 };
 
 export default app;
