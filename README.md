@@ -4,7 +4,7 @@
 
 Application for easy viewing of rss feeds"
 
-##install
+## install
 ```sh
   $ git clone https://github.com/ronin1991/frontend-project-lvl3.git
 ```
