@@ -5,7 +5,7 @@ const parse = (data) => {
   const error = document.querySelector('parsererror');
 
   if (error) {
-    throw new Error('parserError');
+    throw new Error('p');
   }
 
   const title = document.querySelector('title').textContent;

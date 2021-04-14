@@ -1,7 +1,6 @@
 import onChange from 'on-change';
 
 const renderError = ({ message }, { input, feedback }, i18next) => {
-  console.log(message);
   const errorMessage = message.split(':')[0];
   input.classList.add('is-invalid');
   feedback.classList.add('text-danger');

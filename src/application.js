@@ -40,7 +40,12 @@ const addPosts = (items, watch, feedId) => {
   watch.posts = [...watch.posts, ...posts];
 };
 
-const addProxyTo = (url) => `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`;
+const addProxyTo = (url) => {
+  const link = new URL('https://api.allorigins.win/get?');
+  link.searchParams.set('url', url);
+
+  return link.href;
+};
 
 const updateFeeds = (watcher) => {
   if (!watcher.feeds.length) {
