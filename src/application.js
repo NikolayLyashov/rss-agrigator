@@ -1,4 +1,3 @@
-/* eslint-disable object-curly-newline */
 import axios from 'axios';
 import * as yup from 'yup';
 import _ from 'lodash';
@@ -20,13 +19,23 @@ const validate = (url, urls) => {
 };
 
 const addFeeds = (watch, title, description, url, feedId) => {
-  const feed = { title, description, url, feedId };
+  const feed = {
+    title,
+    description,
+    url,
+    feedId,
+  };
 
   watch.feeds = [...watch.feeds, feed];
 };
 
 const addPosts = (items, watch, feedId) => {
-  const posts = items.map(({ title, description, link }) => ({ title, description, link, feedId }));
+  const posts = items.map(({ title, description, link }) => ({
+    title,
+    description,
+    link,
+    feedId,
+  }));
 
   watch.posts = [...watch.posts, ...posts];
 };

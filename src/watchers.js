@@ -105,6 +105,7 @@ const renderForm = ({ valid, error }, elements, i18next) => {
     return null;
   }
   renderError(error, elements, i18next);
+  return null;
 };
 
 const renderDownloadProcess = ({ status, error }, elements, i18next) => {
@@ -124,7 +125,7 @@ const renderDownloadProcess = ({ status, error }, elements, i18next) => {
       renderError(error, elements);
       break;
     default:
-      break;
+      throw new Error(`Unknown status: ${status}`);
   }
 };
 

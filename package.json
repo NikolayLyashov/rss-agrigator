@@ -1,11 +1,10 @@
 {
-  "name": "my-webpack-project",
+  "name": "rss-reader",
   "version": "1.0.0",
-  "description": "My webpack project",
+  "description": "Application for easy viewing of rss feeds",
   "main": "index.js",
   "scripts": {
     "dev": "webpack-dev-server",
-    "test": "jest ",
     "build": "webpack",
     "start": "webpack --watch"
   },
@@ -13,7 +12,7 @@
     "type": "git",
     "url": "git+https://github.com/ronin1991/frontend-project-lvl3.git"
   },
-  "author": "",
+  "author": "ronin",
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/ronin1991/frontend-project-lvl3/issues"
