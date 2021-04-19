@@ -6,8 +6,6 @@ import watchedState from './watchers.js';
 import parse from './parser.js';
 import en from './locales/en.js';
 
-// Попоробовать сделать асинхронной функцией
-
 const validate = (url, urls) => {
   try {
     const schema = yup.string().url().notOneOf(urls);
@@ -43,7 +41,7 @@ const addPosts = (items, watch, feedId) => {
 const addProxyTo = (url) => {
   const link = new URL('https://api.allorigins.win/get?');
   link.searchParams.set('url', url);
-
+  link.searchParams.set('disableCache', true);
   return link.href;
 };
 
@@ -70,73 +68,92 @@ const updateFeeds = (watcher) => {
 };
 
 const app = () => {
-  const newInstance = i18next.createInstance({
+  const newInstance = i18next.createInstance();
+  newInstance.init({
     fallbackLng: 'en',
     returnObjects: true,
     resources: {
       en,
     },
-  }, (__, t) => t('key'));
-  // Без колбека не работает
-
-  const state = {
-    form: {
-      status: 'filling',
-      valid: false,
-      error: null,
-    },
-    posts: [],
-    feeds: [],
-    downloadProcess: { status: 'processing', error: null },
-  };
-
-  const domElements = {
-    button: document.querySelector('.btn'),
-    feedback: document.querySelector('.feedback'),
-    input: document.querySelector('input'),
-    feeds: document.querySelector('.feeds'),
-    posts: document.querySelector('.posts'),
-    form: document.querySelector('form'),
-  };
-
-  const watcher = watchedState(state, domElements, newInstance);
-
-  domElements.form.addEventListener('submit', (e) => {
-    e.preventDefault();
-    const urls = state.feeds.map(({ url }) => url);
-
-    const formData = new FormData(e.target);
-    const url = formData.get('url');
-    const getValidError = validate(url, urls);
-
-    if (getValidError) {
-      watcher.form = {
-        ...watcher.form,
-        status: 'error',
-        error: getValidError,
+  }, (err, t) => {
+    const state = {
+      form: {
+        status: 'filling',
         valid: false,
-      };
-      return;
-    }
+        error: null,
+      },
+      activeModel: null,
+      posts: [],
+      feeds: [],
+      downloadProcess: { status: 'processing', error: null },
+    };
 
-    watcher.form = { ...watcher.form, valid: true };
-    watcher.downloadProcess = { ...watcher.downloadProcess, status: 'processing' };
+    const domElements = {
+      button: document.querySelector('.btn'),
+      feedback: document.querySelector('.feedback'),
+      input: document.querySelector('input'),
+      feeds: document.querySelector('.feeds'),
+      posts: document.querySelector('.posts'),
+      form: document.querySelector('form'),
+      preview: document.querySelectorAll('btn-sm'),
+    };
 
-    axios(addProxyTo(url))
-      .then((res) => {
-        const { items, title, description } = parse(res.data.contents);
-        const feedId = _.uniqueId();
+    const watcher = watchedState(state, domElements, t);
 
-        addFeeds(watcher, title, description, url, feedId);
-        addPosts(items, watcher, feedId);
+    domElements.form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const urls = state.feeds.map(({ url }) => url);
 
-        watcher.downloadProcess = { ...watcher.downloadProcess, status: 'success' };
-      }).catch((err) => {
-        watcher.downloadProcess = { ...watcher.downloadProcess, status: 'error', error: err };
-      });
+      const formData = new FormData(e.target);
+      const url = formData.get('url');
+      const getValidError = validate(url, urls);
+
+      // Может быть 2 типа ошибки валидации. 1 валидация , 2 - повторный url
+
+      if (getValidError) {
+        const messageError = (getValidError.message === 'this must be a valid URL')
+          ? 'validationError'
+          : 'urlExist';
+
+        watcher.form = {
+          ...watcher.form,
+          status: 'error',
+          error: { message: messageError },
+          valid: false,
+        };
+        return;
+      }
+
+      watcher.form = { ...watcher.form, valid: true };
+      watcher.downloadProcess = { ...watcher.downloadProcess, status: 'processing' };
+
+      axios(addProxyTo(url))
+        .then((res) => {
+          const { items, title, description } = parse(res.data.contents);
+          const feedId = _.uniqueId();
+
+          addFeeds(watcher, title, description, url, feedId);
+          addPosts(items, watcher, feedId);
+
+          watcher.downloadProcess = { ...watcher.downloadProcess, status: 'success' };
+        }).catch((er) => {
+          if (er.isAxiosError) {
+            watcher.downloadProcess = {
+              ...watcher.downloadProcess,
+              status: 'error',
+              error: { message: 'axios' },
+            };
+            return;
+          }
+
+          watcher.downloadProcess = { ...watcher.downloadProcess, status: 'error', error: er };
+        });
+    });
+
+    console.log(domElements);
+
+    updateFeeds(watcher);
   });
-
-  updateFeeds(watcher);
 };
 
 export default app;

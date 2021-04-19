@@ -2,9 +2,10 @@ export default
 {
   translation: {
     errors: {
-      'this must be a valid URL': 'Must be a valid URL',
-      'this must not be one of the following values': 'RSS already exists',
-      p: 'Unable to parse the page',
+      validationError: 'Must be a valid URL',
+      urlExist: 'RSS already exists',
+      parserError: 'Unable to parse the page',
+      axios: 'Something went wrong when sending an axios request',
     },
     validMessage: 'Rss has been loaded',
     titleFeeds: 'Feeds',
