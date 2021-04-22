@@ -34,6 +34,7 @@ const addPosts = (items, watch, feedId) => {
     link,
     feedId,
     id: _.uniqueId(),
+    viewed: false,
   }));
 
   watch.posts = [...watch.posts, ...posts];
@@ -149,8 +150,11 @@ const app = () => {
     domElements.posts.addEventListener('click', (event) => {
       if (event.target.tagName === 'BUTTON') {
         const activeItemId = event.target.dataset.id;
+        const viewedPost = watcher.posts.find((post) => post.id === activeItemId);
+        viewedPost.viewed = true;
 
         watcher.activeModel = activeItemId;
+        watcher.posts = [...watcher.posts];
       }
     });
 

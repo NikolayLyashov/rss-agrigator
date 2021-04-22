@@ -80,9 +80,12 @@ const renderPosts = (data, { posts }, i18next) => {
   ul.classList.add('list-group');
 
   data.forEach((post) => {
-    const { link, title, id } = post;
+    const {
+      link, title, id, viewed,
+    } = post;
     const li = document.createElement('li');
-    const a = `<a href=${link} class="font-weight-bold" data-id="2" target="_blank" rel="noopener noreferrer">${title}</a>`;
+    const fontWeight = (viewed) ? 'font-weight-normal' : 'font-weight-bold';
+    const a = `<a href=${link} class="${fontWeight}" data-id="${id}" target="_blank" rel="noopener noreferrer">${title}</a>`;
     const buttonPreview = document.createElement('button');
     buttonPreview.classList.add('btn', 'btn-primary', 'btn-sm');
     buttonPreview.textContent = i18next('buttonPreview');
@@ -118,10 +121,15 @@ const closeModal = (modal) => {
   document.body.querySelector('.modal-backdrop').remove();
 };
 
-const openModal = (id, posts, { modal }) => {
+const openModal = (id, posts, elements) => {
+  const { modal, posts: postsElements } = elements;
   const post = posts.find((p) => p.id === id);
 
   const { title, description } = post;
+
+  const p = postsElements.querySelector(`a[data-id="${id}"]`);
+  p.classList.remove('font-weight-bold');
+  p.classList.add('font-weight-normal');
 
   modal.querySelector('.modal-title').textContent = title;
   modal.querySelector('.modal-body').textContent = description;
@@ -142,7 +150,8 @@ const openModal = (id, posts, { modal }) => {
   document.body.style.paddingRight = '15px';
 };
 
-const renderModal = (id, posts, { modal }) => {
+const renderModal = (id, posts, elements) => {
+  const { modal } = elements;
   const backDrop = document.createElement('div');
   backDrop.classList.add('modal-backdrop', 'fade', 'show');
 
@@ -150,7 +159,7 @@ const renderModal = (id, posts, { modal }) => {
     closeModal(modal);
     return;
   }
-  openModal(id, posts, { modal });
+  openModal(id, posts, elements);
 };
 
 const renderDownloadProcess = ({ status, error }, elements, i18next) => {
