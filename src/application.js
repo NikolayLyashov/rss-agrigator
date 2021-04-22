@@ -102,7 +102,7 @@ const app = () => {
     };
 
     const watcher = watchedState(state, domElements, t);
-    console.log(domElements.form);
+
     domElements.form.addEventListener('submit', (e) => {
       e.preventDefault();
       const urls = state.feeds.map(({ url }) => url);
