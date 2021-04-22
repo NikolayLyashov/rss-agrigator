@@ -71,30 +71,6 @@ const updateFeeds = (watcher) => {
 };
 
 const app = () => {
-  const domElements = {
-    button: document.querySelector('[aria-label=add]'),
-    feedback: document.querySelector('.feedback'),
-    input: document.querySelector('input'),
-    feeds: document.querySelector('.feeds'),
-    posts: document.querySelector('.posts'),
-    form: document.querySelector('.rss-form'),
-    modal: document.querySelector('.modal'),
-  };
-
-  const state = {
-    form: {
-      status: 'filling',
-      valid: false,
-      error: null,
-    },
-    activeModel: null,
-    posts: [],
-    feeds: [],
-    downloadProcess: { status: 'processing', error: null },
-  };
-
-
-  const watcher = watchedState(state, domElements, t);
   const newInstance = i18next.createInstance();
   newInstance.init({
     fallbackLng: 'en',
@@ -103,8 +79,29 @@ const app = () => {
       en,
     },
   }, (err, t) => {
- 
-    
+    const state = {
+      form: {
+        status: 'filling',
+        valid: false,
+        error: null,
+      },
+      activeModel: null,
+      posts: [],
+      feeds: [],
+      downloadProcess: { status: 'processing', error: null },
+    };
+
+    const domElements = {
+      button: document.querySelector('[aria-label=add]'),
+      feedback: document.querySelector('.feedback'),
+      input: document.querySelector('input'),
+      feeds: document.querySelector('.feeds'),
+      posts: document.querySelector('.posts'),
+      form: document.querySelector('.rss-form'),
+      modal: document.querySelector('.modal'),
+    };
+
+    const watcher = watchedState(state, domElements, t);
 
     domElements.form.addEventListener('submit', (e) => {
       e.preventDefault();
