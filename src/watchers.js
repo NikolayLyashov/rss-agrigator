@@ -1,108 +1,9 @@
 import onChange from 'on-change';
 
 const renderError = ({ message }, { input, feedback }, i18next) => {
-  console.log(message);
   input.classList.add('is-invalid');
   feedback.classList.add('text-danger');
   feedback.textContent = i18next(`errors.${message}`);
-};
-
-const creatModal = () => {
-  const divModalDialog = document.createElement('div');
-  divModalDialog.classList.add('modal-dialog', 'role="document');
-
-  const divModalContent = document.createElement('div');
-  divModalContent.classList.add('modal-content');
-
-  const modalHeader = () => {
-    const divModalHeader = document.createElement('div');
-    divModalHeader.classList.add('modal-header');
-
-    const h5 = document.createElement('h5');
-    h5.classList.add('modal-title');
-    h5.textContent = 'Циклы / HTML: Препроцессор Pug';
-
-    const buttonClose = document.createElement('button');
-    buttonClose.classList.add('close');
-    buttonClose.setAttribute('type', 'button');
-    buttonClose.setAttribute('aria-label', 'Сlose');
-    buttonClose.dataset.dismiss = 'modal';
-
-    const span = document.createElement('span');
-    span.textContent = 'x';
-    span.setAttribute('aria-hidden', 'true');
-
-    buttonClose.appendChild(span);
-
-    divModalHeader.appendChild(h5);
-    divModalHeader.appendChild(buttonClose);
-    // Сделать через oHTML
-    return divModalHeader;
-  };
-
-  const modalBody = () => {
-    const divModalBody = document.createElement('div');
-    divModalBody.classList.add('modal-body');
-    divModalBody.textContent = 'Цель: Научиться перебирать массивы и объекты с использованием циклов Pug.';
-
-    return divModalBody;
-  };
-
-  const modalFooter = () => {
-    const divFooter = document.createElement('div');
-    divFooter.classList.add('modal-footer');
-    const a = '<a class="btn btn-primary full-article" href="https://ru.hexlet.io/courses/html-pug/lessons/iteration/theory_unit"role="button"target="_blank"rel="noopener noreferrer">Читать полностью</a>';
-
-    const button = document.createElement('button');
-    button.setAttribute('type', 'button');
-    button.classList.add('btn', 'btn-secondary');
-    button.textContent = 'Закрыть';
-
-    divFooter.innerHTML = `${a}`;
-    divFooter.appendChild(button);
-
-    return divFooter;
-  };
-
-  // <div class="modal-dialog" role="document">
-  //     <div class="modal-content">
-  //       <div class="modal-header">
-  //         <h5 class="modal-title">Циклы / HTML: Препроцессор Pug</h5>
-  //         <button
-  //           type="button"
-  //           class="close"
-  //           data-dismiss="modal"
-  //           aria-label="Close"
-  //         >
-  //           <span aria-hidden="true">×</span>
-  //         </button>
-  //       </div>
-  //       <div class="modal-body">
-  //         Цель: Научиться перебирать массивы и объекты с использованием циклов Pug.
-  //         Изучить конструкцию each else
-  //       </div>
-  //       <div class="modal-footer">
-  //         <a
-  //           class="btn btn-primary full-article"
-  //           href="https://ru.hexlet.io/courses/html-pug/lessons/iteration/theory_unit"
-  //           role="button"
-  //           target="_blank"
-  //           rel="noopener noreferrer"
-  //         >
-  //           Читать полностью{" "}
-  //         </a>
-  //         <button type="button" class="btn btn-secondary" data-dismiss="modal">
-  //           Закрыть
-  //         </button>
-  //       </div>
-  //     </div>
-  //   </div>
-  console.log(modalFooter());
-  divModalDialog.appendChild(modalHeader());
-  divModalDialog.appendChild(modalBody());
-  divModalDialog.appendChild(modalFooter());
-
-  return divModalDialog;
 };
 
 const deletedError = ({ input, feedback }) => {
@@ -179,17 +80,14 @@ const renderPosts = (data, { posts }, i18next) => {
   ul.classList.add('list-group');
 
   data.forEach((post) => {
-    const { link, title } = post;
+    const { link, title, id } = post;
     const li = document.createElement('li');
     const a = `<a href=${link} class="font-weight-bold" data-id="2" target="_blank" rel="noopener noreferrer">${title}</a>`;
     const buttonPreview = document.createElement('button');
     buttonPreview.classList.add('btn', 'btn-primary', 'btn-sm');
     buttonPreview.textContent = i18next('buttonPreview');
-    buttonPreview.addEventListener('click', () => {
-      const modal = creatModal();
-      console.log(creatModal());
-      posts.appendChild(modal);
-    });
+    buttonPreview.dataset.id = id;
+
     li.classList.add('list-group-item', 'd-flex', 'justify-content-between', 'align-items-start');
     li.innerHTML = a;
     li.appendChild(buttonPreview);
@@ -206,6 +104,53 @@ const renderForm = ({ valid, error }, elements, i18next) => {
   }
   renderError(error, elements, i18next);
   return null;
+};
+
+const closeModal = (modal) => {
+  modal.classList.remove('show');
+  modal.style.display = 'none';
+  modal.style.paddingRight = '';
+  modal.setAttribute('aria-hidden', true);
+  modal.removeAttribute('role');
+
+  document.body.classList.remove('modal-open');
+  document.body.style.paddingRight = '';
+  document.body.querySelector('.modal-backdrop').remove();
+};
+
+const openModal = (id, posts, { modal }) => {
+  const post = posts.find((p) => p.id === id);
+
+  const { title, description } = post;
+
+  modal.querySelector('.modal-title').textContent = title;
+  modal.querySelector('.modal-body').textContent = description;
+
+  modal.classList.add('show');
+  modal.style.display = 'block';
+  modal.style.paddingRight = '15px';
+  modal.removeAttribute('aria-hidden');
+  modal.setAttribute('aria-modal', true);
+  modal.setAttribute('role', 'dialog');
+
+  document.body.classList.add('modal-open');
+
+  const backDrop = document.createElement('div');
+  backDrop.classList.add('modal-backdrop', 'fade', 'show');
+
+  document.body.appendChild(backDrop);
+  document.body.style.paddingRight = '15px';
+};
+
+const renderModal = (id, posts, { modal }) => {
+  const backDrop = document.createElement('div');
+  backDrop.classList.add('modal-backdrop', 'fade', 'show');
+
+  if (!id) {
+    closeModal(modal);
+    return;
+  }
+  openModal(id, posts, { modal });
 };
 
 const renderDownloadProcess = ({ status, error }, elements, i18next) => {
@@ -242,6 +187,9 @@ const watchedState = (state, elements, i18next) => onChange(state, (path, value)
       break;
     case 'downloadProcess':
       renderDownloadProcess(value, elements, i18next);
+      break;
+    case 'activeModel':
+      renderModal(value, state.posts, elements);
       break;
     default:
       break;
