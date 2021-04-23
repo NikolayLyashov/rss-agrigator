@@ -2,7 +2,7 @@
   "name": "@hexlet/code",
   "version": "1.0.0",
   "description": "Application for easy viewing of rss feeds",
-  "main": "./src/index.js",
+  "main": "./src/application.js",
   "scripts": {
     "dev": "webpack-dev-server",
     "build": "webpack",
