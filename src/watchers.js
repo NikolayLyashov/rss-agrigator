@@ -170,12 +170,12 @@ const renderDownloadProcess = ({ status, error }, elements, i18next) => {
       input.readOnly = true;
       break;
     case 'success':
-      button.disabled = false;
-      input.readOnly = false;
+      button.removeAttribute('disabled');
+      input.removeAttribute('readonly');
       renderFinishedForm(elements, i18next);
       break;
     case 'error':
-      button.disabled = false;
+      button.removeAttribute('disabled');
       renderError(error, elements, i18next);
       break;
     default:
