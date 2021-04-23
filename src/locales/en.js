@@ -2,15 +2,15 @@ export default
 {
   translation: {
     errors: {
-      invalidUrl: 'Must be a valid URL',
-      urlExist: 'RSS already exists',
-      parserError: 'Unable to parse the page',
+      invalidUrl: 'Ссылка должна быть валидным URL',
+      urlExist: 'RSS уже существует',
+      parserError: 'Ресурс не содержит валидный RSS',
       axios: 'Something went wrong when sending an axios request',
-      networkError: 'network error',
+      networkError: 'Ошибка сети',
     },
-    validMessage: 'Rss has been loaded',
+    validMessage: 'RSS успешно загружен',
     titleFeeds: 'Feeds',
     titlePosts: 'Posts',
-    buttonPreview: 'Preview',
+    buttonPreview: 'Просмотр',
   },
 };
