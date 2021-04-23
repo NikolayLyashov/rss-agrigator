@@ -22,16 +22,8 @@ const renderFinishedForm = ({ feedback, input }, i18next) => {
 };
 
 const renderFeeds = (stateFeeds, { feeds }, i18next) => {
-  let titleFeeds;
-  let ul;
-
-  if (!feeds.querySelector('h2')) {
-    titleFeeds = document.createElement('h2');
-    ul = document.createElement('ul');
-  } else {
-    titleFeeds = feeds.querySelector('h2');
-    ul = feeds.querySelector('ul');
-  }
+  const titleFeeds = (feeds.querySelector('h2')) ? feeds.querySelector('h2') : document.createElement('h2');
+  const ul = (feeds.querySelector('h2')) ? feeds.querySelector('ul') : document.createElement('ul');
 
   ul.innerHTML = '';
 
@@ -61,16 +53,8 @@ const renderFeeds = (stateFeeds, { feeds }, i18next) => {
 };
 
 const renderPosts = (data, { posts }, i18next) => {
-  let titlePosts;
-  let ul;
-
-  if (!posts.querySelector('h2')) {
-    titlePosts = document.createElement('h2');
-    ul = document.createElement('ul');
-  } else {
-    titlePosts = posts.querySelector('h2');
-    ul = posts.querySelector('ul');
-  }
+  const titlePosts = (posts.querySelector('h2')) ? posts.querySelector('h2') : document.createElement('h2');
+  const ul = (posts.querySelector('h2')) ? posts.querySelector('ul') : document.createElement('ul');
 
   ul.innerHTML = '';
 
