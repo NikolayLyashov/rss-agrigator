@@ -176,6 +176,7 @@ const renderDownloadProcess = ({ status, error }, elements, i18next) => {
       break;
     case 'error':
       button.removeAttribute('disabled');
+      input.removeAttribute('readonly');
       renderError(error, elements, i18next);
       break;
     default:
