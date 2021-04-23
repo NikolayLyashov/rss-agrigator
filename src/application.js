@@ -138,7 +138,7 @@ const app = () => {
             watcher.downloadProcess = {
               ...watcher.downloadProcess,
               status: 'error',
-              error: { message: 'axios' },
+              error: { message: 'networkError' },
             };
             return;
           }
